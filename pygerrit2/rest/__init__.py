@@ -25,6 +25,9 @@
 import json
 import logging
 import requests
+import urllib
+
+from requests.auth import HTTPDigestAuth
 
 GERRIT_MAGIC_JSON_PREFIX = ")]}\'\n"
 GERRIT_AUTH_SUFFIX = "/a"
