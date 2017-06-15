@@ -25,6 +25,11 @@
 import json
 import logging
 import requests
+import urllib
+
+from requests.auth import HTTPDigestAuth
+
+from pygerrit2.rest.model import GerritChange
 
 GERRIT_MAGIC_JSON_PREFIX = ")]}\'\n"
 GERRIT_AUTH_SUFFIX = "/a"
@@ -264,98 +269,58 @@ class GerritRestAPI(object):
         self.post(endpoint, data=str(review))
 
 
-class GerritReview(object):
+class GerritClient(GerritRestAPI):
+    def __init__(self, url, username, password, auth_class=HTTPDigestAuth):
+        super(GerritClient, self).__init__(url, auth=auth_class(username, password))
 
-    """ Encapsulation of a Gerrit review.
-
-    :arg str message: (optional) Cover message.
-    :arg dict labels: (optional) Review labels.
-    :arg dict comments: (optional) Inline comments.
-
-    """
-
-    def __init__(self, message=None, labels=None, comments=None):
-        self.message = message if message else ""
-        if labels:
-            if not isinstance(labels, dict):
-                raise ValueError("labels must be a dict.")
-            self.labels = labels
-        else:
-            self.labels = {}
-        if comments:
-            if not isinstance(comments, list):
-                raise ValueError("comments must be a list.")
-            self.comments = {}
-            self.add_comments(comments)
-        else:
-            self.comments = {}
-
-    def set_message(self, message):
-        """ Set review cover message.
-
-        :arg str message: Cover message.
-
+    def get_project(self, project_name):
         """
-        self.message = message
-
-    def add_labels(self, labels):
-        """ Add labels.
-
-        :arg dict labels: Labels to add, for example
-
-        Usage::
-
-            add_labels({'Verified': 1,
-                        'Code-Review': -1})
-
+        Find a project
+        :param project_name: The name of the project
+        :return: object you can use to operate on the project
         """
-        self.labels.update(labels)
+        return GerritProject(self, **self.get('/projects/%s' % urllib.quote_plus(project_name)))
 
-    def add_comments(self, comments):
-        """ Add inline comments.
-
-        :arg dict comments: Comments to add.
-
-        Usage::
-
-            add_comments([{'filename': 'Makefile',
-                           'line': 10,
-                           'message': 'inline message'}])
-
-            add_comments([{'filename': 'Makefile',
-                           'range': {'start_line': 0,
-                                     'start_character': 1,
-                                     'end_line': 0,
-                                     'end_character': 5},
-                           'message': 'inline message'}])
-
+    def query_changes(self, **kwargs):
         """
-        for comment in comments:
-            if 'filename' and 'message' in list(comment.keys()):
-                msg = {}
-                if 'range' in list(comment.keys()):
-                    msg = {"range": comment['range'],
-                           "message": comment['message']}
-                elif 'line' in list(comment.keys()):
-                    msg = {"line": comment['line'],
-                           "message": comment['message']}
-                else:
-                    continue
-                file_comment = {comment['filename']: [msg]}
-                if self.comments:
-                    if comment['filename'] in list(self.comments.keys()):
-                        self.comments[comment['filename']].append(msg)
-                    else:
-                        self.comments.update(file_comment)
-                else:
-                    self.comments.update(file_comment)
+        :keyword change: The Change-Id of the change.
+        :keyword project: The name of the project.
+        :keyword branch: The name of the target branch. The refs/heads/ prefix is omitted.
+        :keyword subject: The subject of the change (header line of the commit message).
+        :keyword status: The status of the change (NEW, MERGED, ABANDONED, DRAFT).
+        :keyword topic: The topic to which this change belongs
+        :return:
+        """
+        options = ['CURRENT_REVISION', 'CURRENT_COMMIT', 'CURRENT_FILES'] if 'options' not in kwargs else kwargs.pop(
+            'options')
 
-    def __str__(self):
-        review_input = {}
-        if self.message:
-            review_input.update({'message': self.message})
-        if self.labels:
-            review_input.update({'labels': self.labels})
-        if self.comments:
-            review_input.update({'comments': self.comments})
-        return json.dumps(review_input, sort_keys=True)
+        def _encode_query(query):
+            query_string = urllib.urlencode(query, doseq=True) if query else ''
+            return query_string
+
+        query = ' '.join('{}:{}'.format(k, v.replace(' ', '+')) for k, v in kwargs.items())
+        return [GerritChange(self, **c) for c in self.get('/changes/?' + _encode_query({
+            'o': options,
+            'q': query
+        }))]
+
+    def get_change(self, **kwargs):
+        return next(iter(self.query_changes(**kwargs) or []), None)
+
+    def create_change(self, project, branch, subject, **optional_args):
+        """
+        :param project: The name of the project.
+        :param branch: The name of the target branch. The refs/heads/ prefix is omitted.
+        :param subject: The subject of the change (header line of the commit message).
+        :keyword change_id: The Change-Id of the change.
+        :keyword status: The status of the change (NEW, MERGED, ABANDONED, DRAFT).
+        :keyword topic: The topic to which this change belongs
+        :return:
+        """
+        args = {
+            'project': project,
+            'branch': branch,
+            'subject': subject
+        }
+        args.update(optional_args)
+        return GerritChange(self, **self.post('/changes/', json=args))
