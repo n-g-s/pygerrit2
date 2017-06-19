@@ -29,6 +29,8 @@ import urllib
 
 from requests.auth import HTTPDigestAuth
 
+from pygerrit2.rest.model import GerritChange
+
 GERRIT_MAGIC_JSON_PREFIX = ")]}\'\n"
 GERRIT_AUTH_SUFFIX = "/a"
 
