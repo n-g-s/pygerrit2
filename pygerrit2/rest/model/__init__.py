@@ -133,6 +133,10 @@ class GerritChange(object):
     def files(self):
         return self.__dict__['revisions'][self.revision]['files']
 
+    @property
+    def status(self):
+        return self.__dict__['status']
+
     def rebase(self):
         return self.gerrit.post('/changes/%s/rebase' % self.id)
 
@@ -160,6 +164,9 @@ class GerritChange(object):
 
     def delete_edit(self):
         return self.gerrit.delete('/changes/%s/edit' % self.id)
+
+    def publish(self):
+        return self.gerrit.post('/changes/%s/publish' % self.id)
 
     def add_review(self, **kwargs):
         """
