@@ -168,7 +168,7 @@ class GerritRestAPI(object):
 
         """
         args = {}
-        if "data" in kwargs or "json" in kwargs:
+        if ("data" in kwargs and isinstance(kwargs["data"], dict)) or "json" in kwargs:
             _merge_dict(
                 args, {
                     "headers": {
@@ -199,7 +199,7 @@ class GerritRestAPI(object):
 
         """
         args = {}
-        if "data" in kwargs or "json" in kwargs:
+        if ("data" in kwargs and isinstance(kwargs["data"], dict)) or "json" in kwargs:
             _merge_dict(
                 args, {
                     "headers": {
