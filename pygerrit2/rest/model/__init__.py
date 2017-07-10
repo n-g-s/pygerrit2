@@ -169,7 +169,7 @@ class GerritChange(object):
         return self.gerrit.post('/changes/%s/publish' % self.id)
 
     def add_reviewer(self, reviewer):
-        return self.gerrit.post('/changes/%s/reviewers' % self.id, json='{{ "reviewer": "{}" }}'.format(reviewer))
+        return self.gerrit.post('/changes/%s/reviewers' % self.id, json={ "reviewer": reviewer })
 
     def add_review(self, **kwargs):
         """
