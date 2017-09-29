@@ -143,6 +143,12 @@ class GerritChange(object):
     def abandon(self):
         return self.gerrit.post('/changes/%s/abandon' % self.id)
 
+    def get_topic(self):
+        return self.gerrit.get('/changes/%s/topic' % self.id)
+
+    def set_topic(self, topic):
+        return self.gerrit.put('/changes/%s/topic' % self.id, json={ 'topic': topic })
+
     def submit(self):
         return self.gerrit.post('/changes/%s/submit' % self.id)
 
