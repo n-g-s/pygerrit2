@@ -25,7 +25,7 @@
 import json
 import logging
 import requests
-import urllib
+from six.moves.urllib.parse import urlencode, quote_plus
 
 from requests.auth import HTTPDigestAuth
 
@@ -279,7 +279,7 @@ class GerritClient(GerritRestAPI):
         :param project_name: The name of the project
         :return: object you can use to operate on the project
         """
-        return GerritProject(self, **self.get('/projects/%s' % urllib.quote_plus(project_name)))
+        return GerritProject(self, **self.get('/projects/%s' % quote_plus(project_name)))
 
     def query_changes(self, **kwargs):
         """
@@ -295,7 +295,7 @@ class GerritClient(GerritRestAPI):
             'options')
 
         def _encode_query(query):
-            query_string = urllib.urlencode(query, doseq=True) if query else ''
+            query_string = urlencode(query, doseq=True) if query else ''
             return query_string
 
         query = ' '.join('{}:{}'.format(k, v.replace(' ', '+')) for k, v in kwargs.items())
