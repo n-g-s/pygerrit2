@@ -25,7 +25,7 @@
 import json
 import logging
 import requests
-import urllib
+from six.moves.urllib.parse import urlencode
 
 from requests.auth import HTTPDigestAuth
 

@@ -1,2 +1,3 @@
 pbr>=0.8.0
 requests==2.14.2
+six
