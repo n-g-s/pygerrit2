@@ -29,7 +29,7 @@ import urllib
 
 from requests.auth import HTTPDigestAuth
 
-from pygerrit2.rest.model import GerritChange
+from pygerrit2.rest.model import GerritChange, GerritProject, GerritReview
 
 GERRIT_MAGIC_JSON_PREFIX = ")]}\'\n"
 GERRIT_AUTH_SUFFIX = "/a"
@@ -181,7 +181,6 @@ class GerritRestAPI(object):
         response = self.session.put(self.make_url(endpoint), **args)
 
         decoded_response = _decode_response(response)
-
         if return_response:
             return decoded_response, response
         return decoded_response
@@ -293,7 +292,7 @@ class GerritClient(GerritRestAPI):
             'options')
 
         def _encode_query(query):
-            query_string = urllib.urlencode(query, doseq=True) if query else ''
+            query_string = urlencode(query, doseq=True) if query else ''
             return query_string
 
         query = ' '.join('{}:{}'.format(k, v.replace(' ', '+')) for k, v in kwargs.items())
