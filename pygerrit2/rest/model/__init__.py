@@ -143,6 +143,15 @@ class GerritChange(object):
     def abandon(self):
         return self.gerrit.post('/changes/%s/abandon' % self.id)
 
+    def get_topic(self):
+        return self.gerrit.get('/changes/%s/topic' % self.id)
+
+    def set_topic(self, topic):
+        return self.gerrit.put('/changes/%s/topic' % self.id, json={ 'topic': topic })
+
+    def delete_topic(self):
+        return self.gerrit.delete('/changes/%s/topic' % self.id)
+
     def submit(self):
         return self.gerrit.post('/changes/%s/submit' % self.id)
 
@@ -167,6 +176,9 @@ class GerritChange(object):
 
     def publish(self):
         return self.gerrit.post('/changes/%s/publish' % self.id)
+
+    def add_reviewer(self, reviewer):
+        return self.gerrit.post('/changes/%s/reviewers' % self.id, json={ 'reviewer': reviewer })
 
     def add_review(self, **kwargs):
         """
