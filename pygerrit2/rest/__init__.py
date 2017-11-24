@@ -286,7 +286,7 @@ class GerritClient(GerritRestAPI):
         :keyword change: The Change-Id of the change.
         :keyword project: The name of the project.
         :keyword branch: The name of the target branch. The refs/heads/ prefix is omitted.
-        :keyword subject: The subject of the change (header line of the commit message).
+        :keyword message: The subject of the change (header line of the commit message).
         :keyword status: The status of the change (NEW, MERGED, ABANDONED, DRAFT).
         :keyword topic: The topic to which this change belongs
         :return:
@@ -298,7 +298,7 @@ class GerritClient(GerritRestAPI):
             query_string = urlencode(query, doseq=True) if query else ''
             return query_string
 
-        query = ' '.join('{}:{}'.format(k, v.replace(' ', '+')) for k, v in kwargs.items())
+        query = ' '.join('{}:{}'.format(k, v.replace(' ', '+')) for k, v in kwargs.items() if v)
         return [GerritChange(self, **c) for c in self.get('/changes/?' + _encode_query({
             'o': options,
             'q': query
