@@ -29,7 +29,7 @@ from six.moves.urllib.parse import urlencode, quote_plus
 
 from requests.auth import HTTPDigestAuth
 
-from pygerrit2.rest.model import GerritChange
+from pygerrit2.rest.model import GerritChange, GerritProject
 
 GERRIT_MAGIC_JSON_PREFIX = ")]}\'\n"
 GERRIT_AUTH_SUFFIX = "/a"
