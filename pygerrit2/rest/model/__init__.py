@@ -160,10 +160,7 @@ class GerritChange(object):
 
     def get_files_changed(self, glob_filter='*'):
         files_changed_names = [k for k, v in self.files.items() if fnmatch.fnmatch(k, glob_filter)]
-        files_changed_names_encode = []
-        for i in files_changed_names:
-            files_changed_names_encode.append(urllib.parse.quote_plus(i))
-        return {f: self.get_file_content(f) for f in files_changed_names_encode}
+        return {f: self.get_file_content(f) for f in files_changed_names} 
 
     def change_file_content_in_edit(self, filename, stream):
         return self.gerrit.put('/changes/%s/edit/%s' % (self.id, urllib.quote_plus(filename)), data=stream)
