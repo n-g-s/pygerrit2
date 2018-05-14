@@ -27,7 +27,7 @@ import logging
 import requests
 from six.moves.urllib.parse import urlencode, quote_plus
 
-from requests.auth import HTTPDigestAuth
+from requests.auth import HTTPBasicAuth
 
 from pygerrit2.rest.model import GerritChange, GerritProject
 
@@ -270,7 +270,7 @@ class GerritRestAPI(object):
 
 
 class GerritClient(GerritRestAPI):
-    def __init__(self, url, username, password, auth_class=HTTPDigestAuth):
+    def __init__(self, url, username, password, auth_class=HTTPBasicAuth):
         super(GerritClient, self).__init__(url, auth=auth_class(username, password))
 
     def get_project(self, project_name):
