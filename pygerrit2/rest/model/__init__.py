@@ -159,7 +159,7 @@ class GerritChange(object):
         return self.gerrit.get('/changes/%s/revisions/%s/files/%s/content' % (self.id, self.revision, filename))
 
     def get_files_changed(self, glob_filter='*'):
-        files_changed_names = [k for k, v in self.files.items() if fnmatch.fnmatch(k, glob_filter)]
+        files_changed_names = [urllib.parse.quote_plus(k) for k, v in self.files.items() if fnmatch.fnmatch(k, glob_filter)]
         return {f: self.get_file_content(f) for f in files_changed_names}
 
     def change_file_content_in_edit(self, filename, stream):
